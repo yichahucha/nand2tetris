@@ -1,0 +1,99 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/05/CPU.hdl
+
+/**
+ * The Hack CPU (Central Processing unit), consisting of an ALU,
+ * two registers named A and D, and a program counter named PC.
+ * The CPU is designed to fetch and execute instructions written in 
+ * the Hack machine language. In particular, functions as follows:
+ * Executes the inputted instruction according to the Hack machine 
+ * language specification. The D and A in the language specification
+ * refer to CPU-resident registers, while M refers to the external
+ * memory location addressed by A, i.e. to Memory[A]. The inM input 
+ * holds the value of this location. If the current instruction needs 
+ * to write a value to M, the value is placed in outM, the address 
+ * of the target location is placed in the addressM output, and the 
+ * writeM control bit is asserted. (When writeM==0, any value may 
+ * appear in outM). The outM and writeM outputs are combinational: 
+ * they are affected instantaneously by the execution of the current 
+ * instruction. The addressM and pc outputs are clocked: although they 
+ * are affected by the execution of the current instruction, they commit 
+ * to their new values only in the next time step. If reset==1 then the 
+ * CPU jumps to address 0 (i.e. pc is set to 0 in next time step) rather 
+ * than to the address resulting from executing the current instruction. 
+ */
+
+
+CHIP CPU {
+
+    IN  inM[16],         // M value input  (M = contents of RAM[A])
+        instruction[16], // Instruction for execution
+        reset;           // Signals whether to re-start the current
+                         // program (reset==1) or continue executing
+                         // the current program (reset==0).
+
+    OUT outM[16],        // M value output
+        writeM,          // Write to M? 
+        addressM[15],    // Address in data memory (of M)
+        pc[15];          // address of next instruction
+
+    PARTS:
+    // Put your code here:
+
+    //指令最高位也就是第15位，0代表A指令，1代表C指令
+    Or(a=instruction[15],b=false,out=isA);
+
+    //选择A寄存器的输入是A指令，还是ALU的输出
+    Mux16(a=instruction,b=outALU,sel=isA,out=inA);
+    //A寄存器，判断一下如果是A指令直接写入，C指令要根据instruction[5]来判断是否写入
+    Mux(a=true,b=instruction[5],sel=isA,out=ins5);
+    ARegister(in=inA,load=ins5,out=outA);
+    
+    //D寄存器，A指令不写入，C指令根据instruction[4]判断是否写入
+    Mux(a=false,b=instruction[4],sel=isA,out=ins4);
+    DRegister(in=outALU,load=ins4,out=outD);
+
+    //writeM，A指令输出0，C指令输出instruction[3]
+    Mux(a=false,b=instruction[3],sel=isA,out=ins3);
+    Mux(a=false,b=true,sel=ins3,out=writeM);
+
+    //addressM，A指令写入的同时，输出addressM
+    Mux16(a=outA,b=false,sel=false,out[0..14]=addressM);
+
+    //instruction[12]判断ALU的输入是取A寄存器输出还是inM输入
+    Mux(a=false,b=instruction[12],sel=isA,out=ins12);
+    Mux16(a=outA,b=inM,sel=ins12,out=outAM);
+    
+    //C指令的[6..11]6位是ALU的控制位，按顺序对应填写即可
+    Mux(a=false,b=instruction[11],sel=isA,out=ins11);
+    Mux(a=false,b=instruction[10],sel=isA,out=ins10);
+    Mux(a=false,b=instruction[9],sel=isA,out=ins9);
+    Mux(a=false,b=instruction[8],sel=isA,out=ins8);
+    Mux(a=false,b=instruction[7],sel=isA,out=ins7);
+    Mux(a=false,b=instruction[6],sel=isA,out=ins6);
+    ALU(x=outD,y=outAM,zx=ins11,nx=ins10,zy=ins9,ny=ins8,f=ins7,no=ins6,out=outALU,out=outM,zr=zr,ng=ng);
+    
+    //指令后三位000 001 010 011 100 101 110 111（具体查看指令表）
+    //000代表不跳转，111代表无条件跳转，其他情况需要根据ALU计算结果决定
+    //001表示 out > 0 (就是out不等于0并且out不等于负数，也就是 zr=0 并且 ng=0，那就是zr和ng做或运算然后取反)
+    Or(a=zr,b=ng,out=outOrzrng);
+    Not(in=outOrzrng,out=JGT);
+    //010表示 out == 0 取zr的值
+    //011表示 out >= 0 ng的值取反
+    Not(in=ng,out=notng);
+    //100表示 out < 0 取ng的值
+    //101表示 out != 0 zr的值取反
+    Not(in=zr,out=notzr);
+    //110表示 out <= 0 JGT的值取反
+    Not(in=JGT,out=JLE);
+    Mux8Way16(sel=instruction[0..2],a[0]=false,b[0]=JGT,c[0]=zr,d[0]=notng,e[0]=ng,f[0]=notzr,g[0]=JLE,h[0]=true,out[0]=isJump);
+
+    //指令A不跳转，指令C根据跳转控制参数跳转，inc写死true，默认是自增的
+    Mux(a=false,b=isJump,sel=isA,out=jump);
+    PC(in=outA,load=jump,inc=true,reset=reset,out[0..14]=pc);
+}
+
+//参考视频和图片文件夹
+//https://www.youtube.com/watch?v=OXK_vzk7cUU&list=PLrDd_kMiAuNmSb-CKWQqq9oBFN_KNMTaI&index=38

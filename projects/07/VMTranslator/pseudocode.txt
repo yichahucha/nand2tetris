@@ -1,0 +1,144 @@
+一、push 操作
+1.取出对应内存段的值
+    0.constant（虚拟内存段）
+        push constant i
+        @i
+        D=A
+    1.local(R1) argument(R2) this(R3) that(R4)
+        push segment i
+        @i
+        D=A
+        @(R1/R2/R3/R4)
+        A=M+D //算出 segment 的地址，base+i
+        D=M //取出 segment i 的值
+    2.temp(temp段地址是从5开始的，所以是5+i，R5-R12)
+        push temp i
+        @(5+i)
+        D=M
+    3.static(static段地址从16开始的，static会按照出现的顺序映射，第一个出现的会放在16，17..依此类推。因此这里边i和static段地址的顺序不是对应的)
+        push static i
+        @fileName.i
+        D=M
+    4.pointer(0取R3 1取R4)
+        pop pointer i
+        @(i==0?R3:R4)
+        D=M
+2.把值写入栈顶
+    @R0
+    A=M
+    M=D
+    @R0
+    M=M+1 //写入栈顶
+
+一、pop 操作
+1.取出对应内存段的地址并存入临时变量（临时变量使用temp段的第一个地址）
+    1.local(R1) argument(R2) this(R3) that(R4)
+        pop segment i
+        @i
+        D=A
+        @(R1/R2/R3/R4)
+        D=M+D //算出 segment 的地址，base+i
+        @R5 
+        M=D //地址存入临时变量
+    2.temp(temp段地址是从5开始的，所以是5+i)
+        push temp i
+        @(5+i)
+        D=A
+        @R5
+        M=D //地址存入临时变量
+    3.static(static段地址从16开始的，static会按照出现的顺序映射，第一个出现的会放在16，17..依此类推。因此这里边i和static段地址的顺序不是对应的)
+        push static i
+        @fileName.i
+        D=A
+        @R5
+        M=D //地址存入临时变量
+    4.pointer(0取R3 1取R4)
+        pop pointer i
+        @(i==0?R3:R4)
+        D=A
+        @R5
+        M=D //地址存入临时变量
+
+2.取出栈顶的值并取出临时变量的地址写入对应内存段
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+    @R5
+    A=M
+    M=D //把值放入临时变量的地址
+
+
+三、算数运算
+1.add/sub/and/or
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    M=D //放入临时变量
+
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    D=D(+/-/|/&)M //和临时变量里的值做运算 add="+" sub="-" and="&" or="|"
+
+    @R0
+    A=M
+    M=D
+    @R0
+    M=M+1 //写入栈顶
+
+2.neg/not
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R0
+    A=M
+    M=(-D\!D) //neg取负 or取反
+    @R0
+    M=M+1 //取负数写入栈顶
+
+
+四、逻辑运算（是两个数做减法，利用汇编的分支跳转，结果写为true-1 ，false 0）
+1.eq/gt/lt
+    @R0
+    M=M-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    M=D //放入临时变量
+
+    @R0
+    M=M-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    D=D-M //和临时变量里的值相减
+    @TRUE
+    D;(JEQ/JGT/JLT) //JGT D>0; JEQ D==0 ;JLT D<0
+
+    @R0
+    A=M
+    M=0 //fasle 把0写入栈顶
+    @R0
+    M=M+1
+    @FALSE
+    0;JMP
+
+    (TRUE)
+        @R0
+        A=M
+        M=-1 //true 把-1写入栈顶
+        @R0
+        M=M+1 
+    (FALSE)
+        ....(下一个命令)

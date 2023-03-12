@@ -1,0 +1,75 @@
+// push constant 10
+@10
+D=A
+@R0
+A=M
+M=D
+@R0
+M=M+1
+
+// pop local 0
+@R0
+A=M
+D=M
+@R1
+A=M+0
+M=D
+
+// push constant 21
+@21
+D=A
+@R0
+A=M
+M=D
+@R0
+M=M+1
+
+// push constant 22
+@22
+D=A
+@R0
+A=M
+M=D
+@R0
+M=M+1
+
+// pop argument 2
+@R0
+A=M
+D=M
+@R2
+A=M+2
+M=D
+
+// pop temp 6
+//read
+@R0
+A=M
+D=M
+//write
+@R(5+6)
+M=D
+
+// pop static 8
+@R0
+A=M
+D=M
+@R(16+6)
+M=D
+
+// push argument 1
+@R2
+A=M+2
+D=M
+
+@R0
+A=M
+M=D
+@R0
+M=M+1
+
+
+sp = R0
+local = R1
+argument = R2
+this = R3

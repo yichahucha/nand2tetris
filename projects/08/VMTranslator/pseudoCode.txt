@@ -1,0 +1,287 @@
+一、push 操作
+1.取出对应内存段的值
+    0.constant（虚拟内存段）
+        push constant i
+        @i
+        D=A
+    1.local(R1) argument(R2) this(R3) that(R4)
+        push segment i
+        @i
+        D=A
+        @(R1/R2/R3/R4)
+        A=M+D //算出 segment 的地址，base+i
+        D=M //取出 segment i 的值
+    2.temp(temp段地址是从5开始的，所以是5+i，R5-R12)
+        push temp i
+        @(5+i)
+        D=M
+    3.static(static段地址从16开始的，static会按照出现的顺序映射，第一个出现的会放在16，17..依此类推。因此这里边i和static段地址的顺序不是对应的)
+        push static i
+        @fileName.i
+        D=M
+    4.pointer(0取R3 1取R4)
+        pop pointer i
+        @(i==0?R3:R4)
+        D=M
+2.把值写入栈顶
+    @R0
+    A=M
+    M=D
+    @R0
+    M=M+1 //写入栈顶
+
+一、pop 操作
+1.取出对应内存段的地址并存入临时变量（临时变量使用temp段的第一个地址）
+    1.local(R1) argument(R2) this(R3) that(R4)
+        pop segment i
+        @i
+        D=A
+        @(R1/R2/R3/R4)
+        D=M+D //算出 segment 的地址，base+i
+        @R5 
+        M=D //地址存入临时变量
+    2.temp(temp段地址是从5开始的，所以是5+i)
+        push temp i
+        @(5+i)
+        D=A
+        @R5
+        M=D //地址存入临时变量
+    3.static(static段地址从16开始的，static会按照出现的顺序映射，第一个出现的会放在16，17..依此类推。因此这里边i和static段地址的顺序不是对应的)
+        push static i
+        @fileName.i
+        D=A
+        @R5
+        M=D //地址存入临时变量
+    4.pointer(0取R3 1取R4)
+        pop pointer i
+        @(i==0?R3:R4)
+        D=A
+        @R5
+        M=D //地址存入临时变量
+
+2.取出栈顶的值并取出临时变量的地址写入对应内存段
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+    @R5
+    A=M
+    M=D //把值放入临时变量的地址
+
+
+三、算数运算
+1.add/sub/and/or
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    M=D //放入临时变量
+
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    D=D(+/-/|/&)M //和临时变量里的值做运算 add="+" sub="-" and="&" or="|"
+
+    @R0
+    A=M
+    M=D
+    @R0
+    M=M+1 //写入栈顶
+
+2.neg/not
+    @R0
+    M=M-1 //栈指针-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R0
+    A=M
+    M=(-D\!D) //neg取负 or取反
+    @R0
+    M=M+1 //取负数写入栈顶
+
+
+四、逻辑运算（是两个数做减法，利用汇编的分支跳转，结果写为true-1 ，false 0）
+1.eq/gt/lt
+    @R0
+    M=M-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    M=D //放入临时变量
+
+    @R0
+    M=M-1
+    A=M
+    D=M //取出栈顶的值
+
+    @R5
+    D=D-M //和临时变量里的值相减
+    @TRUE
+    D;(JEQ/JGT/JLT) //JGT D>0; JEQ D==0 ;JLT D<0
+
+    @R0
+    A=M
+    M=0 //fasle 把0写入栈顶
+    @R0
+    M=M+1
+    @FALSE
+    0;JMP
+
+    (TRUE)
+        @R0
+        A=M
+        M=-1 //true 把-1写入栈顶
+        @R0
+        M=M+1 
+    (FALSE)
+        ....(下一个命令)
+
+五、function
+
+//function SimpleFunction.test 2(nVars)
+(SimpleFunction.test)
+    @R13
+    M=0 //i=0
+    @2(n)
+    D=A
+    @R14
+    M=D //n=2
+    (SimpleFunction.test.LOOP)// while
+        @R13
+        D=M
+        @R14
+        D=D-M 
+        @SimpleFunction.test.ENDLOOP // i-n == 0
+        D;JEQ
+
+        //push local 0
+
+        @R13
+        M=M+1 //i++
+        @SimpleFunction.test.LOOP
+        0;JMP
+    (SimpleFunction.test.ENDLOOP)
+
+七、call
+ call foo 2(nArgs)
+    //push addr
+    @RETURNADDRESS
+    D=A
+    ["@SP","A=M","M=D","@SP","M=M+1"]
+    //push LCL
+    @LCL
+    D=M
+    ["@SP","A=M","M=D","@SP","M=M+1"]
+    @ARG
+    D=M
+    ["@SP","A=M","M=D","@SP","M=M+1"]
+    @THIS
+    D=M
+    ["@SP","A=M","M=D","@SP","M=M+1"]
+    @THAT
+    D=M
+    ["@SP","A=M","M=D","@SP","M=M+1"]
+
+    //设置arg指针
+    @SP
+    D=M
+    @5
+    D=D-A
+    @n
+    D=D-A
+    @ARG
+    M=D
+
+    //设置LCL
+    @SP
+    D=M
+    @LCL
+    M=D
+
+    //跳到函数
+    @functionName
+    0;JMP
+
+//函数返回地址标签
+(RETURNADDRESS)
+
+八、return
+    //endFrame 存在一个临时变量里这里选择 R15
+    @R1
+    D=M
+    @R15
+    M=D
+
+    //设置返回值，返回值是当前栈顶的值，返回值应该存入的是当前 arg 0 的地址
+    pop arg 0
+    //重置栈顶置指针为ARG地址+1
+    @R2
+    D=M
+    @R0
+    M=D+1
+
+    //恢复THAT值(endFrame - 1)
+    @R15
+    D=M
+    @1
+    D=D-A
+    A=D
+    D=M
+    @R4
+    M=D
+
+    //恢复THIS值(endFrame - 2)
+    @R15
+    D=M
+    @2
+    D=D-A
+    A=D
+    D=M
+    @R3
+    M=D
+
+    //恢复ARG值(endFrame - 3)
+    @R15
+    D=M
+    @3
+    D=D-A
+    A=D
+    D=M
+    @R2
+    M=D
+
+    //恢复LCL值(endFrame - 4)
+    @R15
+    D=M
+    @4
+    D=D-A
+    A=D
+    D=M
+    @R1
+    M=D
+
+    //return address值(endFrame - 5)
+    @R15
+    D=M
+    @5
+    D=D-A
+    A=D
+    0;JMP
+
+
+
+
+
+
+
+
+
+
+

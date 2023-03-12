@@ -1,0 +1,55 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/03/a/PC.hdl
+
+/**
+ * A 16-bit counter with load and reset control bits.
+ * if      (reset[t] == 1) out[t+1] = 0
+ * else if (load[t] == 1)  out[t+1] = in[t]
+ * else if (inc[t] == 1)   out[t+1] = out[t] + 1  (integer addition)
+ * else                    out[t+1] = out[t]
+ */
+
+CHIP PC {
+    IN in[16],load,inc,reset;
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+
+    Mux16(a=state,b=in16,sel=inc,out=temp1);
+    Mux16(a=temp1,b=in,sel=load,out=temp2);
+    Mux16(a=temp2,b=false,sel=reset,out=newstate);
+    Register(in=newstate,load=true,out=out,out=state);
+    Inc16(in=state,out=in16);
+}
+
+/**
+*   思路：先理解清楚需求，然后一步一步来（绕了迷迷糊糊，需求没理解清楚，英文费劲）
+*   0.先创建一个寄存器，load为 1，可以输入任意值，输入任意值
+*   Register(in=in,load=true,out=out,out=state);
+*
+*   1.再创建一个自增的计数器，让寄存器输出值+1，并且作为寄存器的输入，再输入
+*   Register(in=in16,load=true,out=out,out=state);
+*   Inc16(in=state,out=in16);
+*
+*   2.然后添加 inc 控制位，1自增，0不自增
+*   Mux16(a=state,b=in16,sel=inc,out=temp1);
+*   Register(in=temp1,load=true,out=out,out=state);
+*   Inc16(in=state,out=in16);
+*
+*   3.接着添加 load 控制位，load 控制位只控制 in 输入，如果 load 是1，输出 in 的值
+*   Mux16(a=state,b=in16,sel=inc,out=temp1);
+*   Mux16(a=temp1,b=in,sel=load,out=temp2);
+*   Register(in=temp2,load=true,out=out,out=state);
+*   Inc16(in=state,out=in16);
+*
+*   4.最后添加 reset 控制位，如果 reset 是1，输出0
+*   Mux16(a=state,b=in16,sel=inc,out=temp1);
+*   Mux16(a=temp1,b=in,sel=load,out=temp2);
+*   Mux16(a=temp2,b=false,sel=reset,out=newstate);
+*   Register(in=newstate,load=true,out=out,out=state);
+*   Inc16(in=state,out=in16);
+*/
+ 
