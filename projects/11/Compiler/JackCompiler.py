@@ -1,5 +1,8 @@
-import sys,os,glob
+import sys
+import os
+import glob
 from CompilationEngine import CompilationEngine
+
 
 class JackAnalayzer:
     def __init__(self, filePath):
@@ -7,11 +10,12 @@ class JackAnalayzer:
             files = glob.glob(os.path.join(filePath, '*.jack'))
         else:
             files = [filePath]
-        
+
         for file in files:
             engine = CompilationEngine(file)
             engine.outputVM()
-    
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise "path?.........."
