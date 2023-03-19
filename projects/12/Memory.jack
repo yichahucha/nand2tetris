@@ -12,13 +12,14 @@ class Memory {
 
     static Array ram;
     static Array freeList;
+    
     /** Initializes the class. */
     function void init() {
         let ram = 0;
         // let heap = 2048; //heapBase
         // let freeList = 2048;
         // let freeList[0] = 0; //next
-        // let freeList[1] = 14335; //length(size) size = endAddr - satrtAddr - 1
+        // let freeList[1] = 14335; //length(size)
         let freeList = Memory.block(2048, 0 ,14335);
         return;
     }
