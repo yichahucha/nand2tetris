@@ -19,7 +19,7 @@ class SymbolTable:
             self.subroutineTable.append(row)
             self.indexTable[kind] = self.indexTable[kind]+1
         else:
-            raise ("未定义的类型 def define")
+            raise ValueError("未定义的类型 {}".format(kind))
 
     def varCount(self, kind):
         return self.indexTable[kind]
@@ -28,7 +28,7 @@ class SymbolTable:
         for row in self.classTable + self.subroutineTable:
             if row["name"] == name:
                 return row["kind"]
-        raise "kindOf error name "
+        raise ValueError("kindOf error name {}".format(name))
 
     def typeOf(self, name):
         for row in self.classTable + self.subroutineTable:

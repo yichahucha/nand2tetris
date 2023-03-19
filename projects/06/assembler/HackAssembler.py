@@ -76,8 +76,8 @@ class Parser:
     def decToBin15(self, decimal):
         binary = bin(decimal)[2:].zfill(15)
         return binary
+    
     # 指令写入文件
-
     def write(self, instructions):
         text = ""
         for order in instructions:
@@ -85,20 +85,20 @@ class Parser:
         name, ext = os.path.splitext(os.path.basename(self.filePath))
         with open(name + ".hack", "w") as file:
             file.write(text)
-    # 读取汇编文件
 
+    # 读取汇编文件
     def read(self, name):
         with open(name, "r") as file:
             contents = file.read()
             return self.removeWhiteSpace(contents)
-    # 处理空格，注释，空行，返回数组
 
+    # 处理空格，注释，空行，返回数组
     def removeWhiteSpace(self, text):
         text = text.replace(" ", "")
         text = re.sub(r"\/\/.*", "", text)
         return [s for s in text.split("\n") if len(s) > 0]
+    
     # 获取 label 标签
-
     def label(self, line):
         l = re.findall(r"\((.+)\)", line)
         if l:
