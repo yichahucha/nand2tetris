@@ -14,19 +14,24 @@ class Sys {
         do Math.init();
         //...
         do Main.main();
+        do Sys.halt();
         return;
     }
 
-    // /** Halts the program execution. */
-    // function void halt() {
-    // }
+    /** Halts the program execution. */
+    function void halt() {
+        while(true){}
+        return;
+    }
 
-    // /** Waits approximately duration milliseconds and returns.  */
-    // function void wait(int duration) {
-    // }
+    /** Waits approximately duration milliseconds and returns.  */
+    function void wait(int duration) {
+        return;
+    }
 
-    // /** Displays the given error code in the form "ERR<errorCode>",
-    //  *  and halts the program's execution. */
-    // function void error(int errorCode) {
-    // }
+    /** Displays the given error code in the form "ERR<errorCode>",
+     *  and halts the program's execution. */
+    function void error(int errorCode) {
+        return;
+    }
 }

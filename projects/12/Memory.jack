@@ -54,7 +54,7 @@ class Memory {
             if((Memory.blockSize(freeBlock) > (size+2)) | (Memory.blockSize(freeBlock) = (size+2))) {
                 //获取的内存地址
                 let address = Memory.blockAddress(freeBlock) + Memory.blockSize(freeBlock) - size + 1;
-                //生成新的块，在销毁的时候会用到
+                //生成新的块，销毁的时候会用到
                 let newBlock = Memory.block(address - 2, 0, size);
                 do Memory.setBlockSize(freeBlock, Memory.blockSize(freeBlock) - size - 2);
                 let loop = false;
@@ -92,7 +92,8 @@ class Memory {
         return;
     }
 
-    //链表的块抽象，也可以理解成节点
+    //（！！开发系统级别的 alloc 函数讲究效率，在这里使用函数抽象不太好，函数调用会增加额外的开销，没有直接操作数组效率高。但是它清晰、好读、好写啊。🤷‍♂️）
+    // 链表的块抽象（也可以理解成节点）
     function Array block(Array address, Array next, int size) {
         let address[0] = next;
         let address[1] = size;
