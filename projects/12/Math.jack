@@ -47,26 +47,19 @@ class Math {
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
-        var int i, n, sum, shiftedX;
+        var int i, sum, shiftedX;
         let sum = 0;
         let shiftedX = x;
         let i = 0;
         while(i < 16) {
-            if(Math.bit(y,i)) {
+            //按位与,结果是0或者一个大于0的数
+            if(~((y & bitArray[i]) = 0)) {
                 let sum = sum + shiftedX;
             }
             let shiftedX = shiftedX + shiftedX;
             let i = i + 1;
         }
         return sum;
-    }
-
-    function boolean bit(int x, int i) {
-        //按位与,结果是0或者一个大于0的数
-        if((x & bitArray[i]) = 0) {
-            return false;
-        }
-        return true;
     }
 
     /** Returns the integer part of x/y.
@@ -76,50 +69,45 @@ class Math {
      */
     function int divide(int x, int y) {
         var int q;
-        var boolean neg;
+        var boolean isNeg;
+        var int absResult;
+        if(((x < 0) & (y < 0)) | ((x > 0) & (y > 0))) {
+            let isNeg = false;
+        }else {
+            let isNeg = true;
+        }
         if(x < 0) {
             let x = Math.abs(x);
         }
         if(y < 0){
             let y = Math.abs(y);
         }
-        if(((x < 0) & (y < 0)) | ((x > 0) & (y > 0))) {
-            let neg = false;
-        }else {
-            let neg = true;
-        }
-        if((y > x) & (y < 0)) {
+        if((y > x) | (y < 0)) {
             return 0;
         }
-        let q = Math.divide(x, Math.multiply(2,y));
-        if(x - Math.multiply(2, Math.multiply(x,y))){
-            if(neg) {
-                return -(Math.multiply(2,q));
-            }
-            return Math.multiply(2,q);
+        let q = Math.divide(x, y+y);
+        if((x-(2*q*y)) < y){
+            let absResult = q+q;
         }else {
-            if(neg) {
-                return -(Math.multiply(2,q) + 1);
-            }
-            return Math.multiply(2,q) + 1;
+            let absResult = q+q+1;
         }
+        if(isNeg) {
+            return -absResult;
+        }
+        return absResult;
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
         var int y, j, temp, tempTwo;
-
         if (x < 0) {
             return 0;
         }
-
         let y = 0;
         let j = 7;
-
         while (~(j < 0)) {
             let temp = y + bitArray[j];
             let tempTwo = temp * temp;
-
             if (~(tempTwo > x) & (tempTwo > 0)) {
                 let y = temp;
             }
