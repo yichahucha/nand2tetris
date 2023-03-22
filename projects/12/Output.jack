@@ -77,7 +77,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,48,48,120,72,204,252,252,132,132,0,0);          // A ** TO BE FILLED **
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -189,36 +189,114 @@ class Output {
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
-    //   * The resulting grid accommodates 23 rows (indexed 0..22, top to bottom)
-    //  * of 64 characters each (indexed 0..63, left to right). The top left 
     function void printChar(char c) {
-        var Array charMap, address, i;
+        var Array charMap;
+        var int address, i, j, x, y, value, charValue;
+        //获取字符在内存中的映射
         let charMap = Output.getMap(c);
+        //根据当前游标计算出字符对应的内存起始地址
         let x = cursorColum * 8;
         let y = cursorRow * 11;
-        let address = 16384 + (32 * y) + x / 16;
+        let address = 16384 + (32 * y) + (x / 16);
+        //依次把字符映射的值写入对应的内存
         let i = 0;
         while(i < 11){
-            do Memory.poke(address + (32*i), charMap[i]);
+            /**
+            因为字符的宽是8位，所以一个16位寄存器要存储2个字符，这里要做一下位运算
+            1.根据cursorColum列的游标是奇数还是偶数来判断是写左八位还是右八位。可以使用按位运算符来判断一个整数是奇数还是偶数。因为一个整数的二进制表示，如果最右边的比特位是0，这个整数就是偶数；如果最右边的比特位是1，则这个整数是奇数。
+            2.如果是奇数要把新的字符值向左移8位和旧的字符值做按位或运算，得出新值
+                两个16位二进制数如下：
+                    旧值：000 0000 0000 1111
+                    新值：0000 0000 0000 0011
+                因为当前是奇数列,所以新值左移8位：
+                    0000 0011 0000 0000
+                接着和旧值做按位或运算，得出新值：
+                    0000 0011 0000 1111
+                （默认内存中的二进制值显示在屏幕顺序是相反的，所以显示到屏幕会是：1111 0000 1100 0000）
+            3.再把这个新值写入对应地址
+            */
+            let value = Memory.peek(address + (i*32));
+            let charValue = charMap[i];
+            if(~((cursorColum & 1) = 0)) {
+                let j = 0;
+                while(j < 8) {
+                    //二进制左移一位=原值乘以2，每乘一次左移一位
+                    let charValue = charValue + charValue;
+                    let j = j+1;
+                }
+                let charValue = charValue | value;
+            }
+            do Memory.poke(address + (i*32), charValue);
+            let i = i+1;
         }
+        let cursorColum = cursorColum + 1;
         return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int len, i;
+        let len = s.length();
+        let i = 0;
+        while(i < len){
+            do Output.printChar(s.charAt(i));
+            let i = i+1;
+        }
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var String str;
+        let str = String.new(6);
+        do str.setInt(i);
+        do Output.printString(str);
+        return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        let cursorRow = cursorRow + 1;
+        let cursorColum = 0;
+        return;
     }
 
     /** Moves the cursor one column back. */
+    /**
+    去掉奇数字符(左8位字符)
+    0011 1111 0011 1111
+    &
+    0000 0000 1111 1111（255）
+    =
+    0000 0000 0011 1111
+
+    去掉偶数字符(右八位字符)
+    0000 0000 0011 1111
+    &
+    0000 0000 0000 0000（0）
+    =
+    0000 0000 0000 0000
+    */
     function void backSpace() {
+        var int address, i, x, y, value;
+        //游标后退一位，抹掉对应字符内存中的值（置为0）
+        let cursorColum = cursorColum - 1;
+        let x = cursorColum * 8;
+        let y = cursorRow * 11;
+        let address = 16384 + (32 * y) + (x / 16);
+        let i = 0;
+        while(i < 11){
+            let value = Memory.peek(address + (i*32));
+            if(~((cursorColum & 1) = 0)) {
+                let value = value & 255;
+            }else {
+                let value = value & 0;
+            }
+            do Memory.poke(address + (i*32), value);
+            let i = i+1;
+        }
+        return;
     }
 }

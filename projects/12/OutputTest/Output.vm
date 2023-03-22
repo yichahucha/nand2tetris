@@ -1530,9 +1530,12 @@ add
 pop pointer 1
 push that 0
 pop local 7
-push local 6
+push static 2
+push constant 1
+and
 push constant 0
-gt
+eq
+not
 not
 if-goto IF_TRUE0
 push constant 0
@@ -1605,7 +1608,19 @@ goto WHILE_EXP0
 label WHILE_END0
 push constant 0
 return
-function Output.printInt 0
+function Output.printInt 1
+push constant 6
+call String.new 1
+pop local 0
+push local 0
+push argument 0
+call String.setInt 2
+pop temp 0
+push local 0
+call Output.printString 1
+pop temp 0
+push constant 0
+return
 function Output.println 0
 push static 1
 push constant 1
@@ -1615,4 +1630,76 @@ push constant 0
 pop static 2
 push constant 0
 return
-function Output.backSpace 0
+function Output.backSpace 5
+push static 2
+push constant 1
+sub
+pop static 2
+push static 2
+push constant 8
+call Math.multiply 2
+pop local 2
+push static 1
+push constant 11
+call Math.multiply 2
+pop local 3
+push constant 16384
+push constant 32
+push local 3
+call Math.multiply 2
+add
+push local 2
+push constant 16
+call Math.divide 2
+add
+pop local 0
+push constant 0
+pop local 1
+label WHILE_EXP0
+push local 1
+push constant 11
+lt
+not
+if-goto WHILE_END0
+push local 0
+push local 1
+push constant 32
+call Math.multiply 2
+add
+call Memory.peek 1
+pop local 4
+push static 2
+push constant 1
+and
+push constant 0
+eq
+not
+not
+if-goto IF_TRUE0
+push local 4
+push constant 255
+and
+pop local 4
+goto IF_FALSE0
+label IF_TRUE0
+push local 4
+push constant 0
+and
+pop local 4
+label IF_FALSE0
+push local 0
+push local 1
+push constant 32
+call Math.multiply 2
+add
+push local 4
+call Memory.poke 2
+pop temp 0
+push local 1
+push constant 1
+add
+pop local 1
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
