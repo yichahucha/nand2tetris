@@ -18,14 +18,16 @@ class Output {
 
     // Character map for displaying characters
     static Array charMaps; 
-    static int cursorRow;
-    static int cursorColum;
+    static int cursorY;
+    static int cursorX;
+    static Array screen;
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
         do Output.initMap();
-        let cursorRow = 0;
-        let cursorColum = 0;
+        let cursorY = 0;
+        let cursorX = 0;
+        let screen = 16384;
         return;
     }
 
@@ -182,56 +184,42 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
-        let cursorRow = i;
-        let cursorColum = j;
+        let cursorY = i;
+        let cursorX = j;
         return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
-    //   * The resulting grid accommodates 23 rows (indexed 0..22, top to bottom)
-    //  * of 64 characters each (indexed 0..63, left to right). The top left 
     function void printChar(char c) {
         var Array charMap;
-        var int address, i, j, x, y, value, charValue;
+        var int address, i, x, y, value, bitmap ,mask;
         //获取字符在内存中的映射
         let charMap = Output.getMap(c);
-        //根据当前游标计算出字符对应的内存起始地址
-        let x = cursorColum * 8;
-        let y = cursorRow * 11;
-        let address = 16384 + (32 * y) + (x / 16);
-        //依次把字符映射的值写入对应的内存
+        //根据当前游标计算出字符对应的屏幕内存起始地址
+        let x = cursorX * 8;
+        let y = cursorY * 11;
+        let address = (32 * y) + (x / 16);
+        //判断当前游标奇偶(1奇数 0偶数)
+        let mask = cursorX & 1;
         let i = 0;
         while(i < 11){
-            /**
-            因为字符的宽是8位，所以一个16位寄存器要存储2个字符，这里要做一下位运算
-            1.根据cursorColum列的游标是奇数还是偶数来判断是写左八位还是右八位。可以使用按位运算符来判断一个整数是奇数还是偶数。因为一个整数的二进制表示，如果最右边的比特位是0，这个整数就是偶数；如果最右边的比特位是1，则这个整数是奇数。
-            2.如果是奇数要把新的字符值向左移8位和旧的字符值做按位或运算，得出新值
-                两个16位二进制数如下：
-                    旧值：000 0000 0000 1111
-                    新值：0000 0000 0000 0011
-                因为当前是奇数列,所以新值左移8位：
-                    0000 0011 0000 0000
-                接着和旧值做按位或运算，得出新值：
-                    0000 0011 0000 1111
-                （默认内存中的二进制值显示在屏幕顺序是相反的，所以显示到屏幕会是：1111 0000 1100 0000）
-            3.再把这个新值写入对应地址
-            */
-            let value = Memory.peek(address + (i*32));
-            let charValue = charMap[i];
-            if(~((cursorColum & 1) = 0)) {
-                let j = 0;
-                while(j < 8) {
-                    //二进制左移一位=原值乘以2，每乘一次左移一位
-                    let charValue = charValue + charValue;
-                    let j = j+1;
-                }
-                let charValue = charValue | value;
+            let value = screen[address];
+            let bitmap = charMap[i];
+            if(mask = 1) {
+                //新值左移8位
+                let bitmap = bitmap * 256;
+                //写之前先清空对应内存
+                let screen[address] = value & 255;
+                //再写入新数据
+                let screen[address] = screen[address] | bitmap;
+            }else {
+                let screen[address] = value & 0 | bitmap;
             }
-            do Memory.poke(address + (i*32), charValue);
+            let address = address + 32;
             let i = i+1;
         }
-        let cursorColum = cursorColum + 1;
+        let cursorX = cursorX + 1;
         return;
     }
 
@@ -260,47 +248,14 @@ class Output {
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
-        let cursorRow = cursorRow + 1;
-        let cursorColum = 0;
+        let cursorY = cursorY + 1;
+        let cursorX = 0;
         return;
     }
 
     /** Moves the cursor one column back. */
-    /**
-        1.首先游标后退一位 cursorColum - 1
-        2.然后抹掉对应字符内存中的值（置为0）
-
-            抹掉奇数字符(左8位)
-            0011 1111 0011 1111
-            &
-            0000 0000 1111 1111（255）
-            =
-            0000 0000 0011 1111
-
-            抹掉偶数字符(右8位)
-            0000 0000 0011 1111
-            &
-            0000 0000 0000 0000（0）
-            =
-            0000 0000 0000 0000
-    */
     function void backSpace() {
-        var int address, i, x, y, value;
-        let cursorColum = cursorColum - 1;
-        let x = cursorColum * 8;
-        let y = cursorRow * 11;
-        let address = 16384 + (32 * y) + (x / 16);
-        let i = 0;
-        while(i < 11){
-            let value = Memory.peek(address + (i*32));
-            if(~((cursorColum & 1) = 0)) {
-                let value = value & 255;
-            }else {
-                let value = value & 0;
-            }
-            do Memory.poke(address + (i*32), value);
-            let i = i+1;
-        }
+        let cursorX = cursorX - 1;
         return;
     }
 }
