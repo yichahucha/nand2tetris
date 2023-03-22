@@ -256,5 +256,7 @@ pop temp 0
 push constant 6789
 call Output.printInt 1
 pop temp 0
+call Output.backSpace 0
+pop temp 0
 push constant 0
 return

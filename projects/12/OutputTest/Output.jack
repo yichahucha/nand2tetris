@@ -256,6 +256,8 @@ class Output {
     /** Moves the cursor one column back. */
     function void backSpace() {
         let cursorX = cursorX - 1;
+        do Output.printChar(32);
+        let cursorX = cursorX - 1;
         return;
     }
 }

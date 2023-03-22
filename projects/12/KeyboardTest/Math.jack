@@ -1,0 +1,181 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Math.jack
+
+/**
+ * A library of commonly used mathematical functions.
+ * Note: Jack compilers implement multiplication and division using OS method calls.
+ */
+class Math {
+
+    static Array bitArray;
+
+    /** Initializes the library. */
+    function void init() {
+        let bitArray = Array.new(16);
+        let bitArray[0] = 1;//0000 0000 0000 0001
+        let bitArray[1] = 2;//0000 0000 0000 0010
+        let bitArray[2] = 4;//0000 0000 0000 0100
+        let bitArray[3] = 8;//0000 0000 0000 1000
+        let bitArray[4] = 16;//0000 0000 0001 0000
+        let bitArray[5] = 32;//...
+        let bitArray[6] = 64;
+        let bitArray[7] = 128;
+        let bitArray[8] = 256;
+        let bitArray[9] = 512;
+        let bitArray[10] = 1024;
+        let bitArray[11] = 2048;
+        let bitArray[12] = 4096;
+        let bitArray[13] = 8192;
+        let bitArray[14] = 16384;
+        let bitArray[15] = 16384 + 16384;
+        return;
+    }
+
+    /** Returns the absolute value of x. */
+    function int abs(int x) {
+        if(x < 0){
+            let x = -x;
+        }
+        return x;
+    }
+
+    /** Returns the product of x and y. 
+     *  When a Jack compiler detects the multiplication operator '*' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x*y and multiply(x,y) return the same value.
+     */
+    function int multiply(int x, int y) {
+        var int i, sum, shiftedX;
+        let sum = 0;
+        let shiftedX = x;
+        let i = 0;
+        while(i < 16) {
+            //按位与,结果是0或者一个大于0的数
+            if(~((y & bitArray[i]) = 0)) {
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let i = i + 1;
+        }
+        return sum;
+    }
+
+    /** Returns the integer part of x/y.
+     *  When a Jack compiler detects the multiplication operator '/' in the 
+     *  program's code, it handles it by invoking this method. In other words,
+     *  the Jack expressions x/y and divide(x,y) return the same value.
+     */
+    function int divide(int x, int y) {
+        var int q;
+        var boolean isNeg;
+        var int absResult;
+        if(((x < 0) & (y < 0)) | ((x > 0) & (y > 0))) {
+            let isNeg = false;
+        }else {
+            let isNeg = true;
+        }
+        if(x < 0) {
+            let x = Math.abs(x);
+        }
+        if(y < 0){
+            let y = Math.abs(y);
+        }
+        if((y > x) | (y < 0)) {
+            return 0;
+        }
+        let q = Math.divide(x, y+y);
+        if((x-(2*q*y)) < y){
+            let absResult = q+q;
+        }else {
+            let absResult = q+q+1;
+        }
+        if(isNeg) {
+            return -absResult;
+        }
+        return absResult;
+    }
+
+    /** Returns the integer part of the square root of x. */
+    function int sqrt(int x) {
+        var int y, j, temp, tempTwo;
+        if (x < 0) {
+            return 0;
+        }
+        let y = 0;
+        let j = 7;
+        while (~(j < 0)) {
+            let temp = y + bitArray[j];
+            let tempTwo = temp * temp;
+            if (~(tempTwo > x) & (tempTwo > 0)) {
+                let y = temp;
+            }
+            let j = j - 1;
+        }
+        return y;
+    }
+
+    /** Returns the greater number. */
+    function int max(int a, int b) {
+        if(a > b){
+            return a;
+        }else {
+            return b;
+        }
+    }
+
+    /** Returns the smaller number. */
+    function int min(int a, int b) {
+        if(a < b){
+            return a;
+        }else {
+            return b;
+        }
+    }
+
+    function int twoToThe(int i){
+        return bitArray[i];
+    }
+}
+
+
+/**
+除法递归调用栈模拟
+x/y
+10/3 q=1;rerurn 3;
+
+10/6 q=0; return 1;
+
+10/12 return 0;
+
+q=0 x=10 y=6
+10-0 < 6
+return 1;
+
+q = 1 x=10 y=3
+10-6<3
+retrurn 3;
+
+
+x/y
+12/3 q=2; return 4;
+
+12/6 q=1; return 2;
+
+12/12 q= 0; return 1;
+
+12/24 return 0;
+
+q=0 x=12 y=12
+12-0 < 12
+return 1;
+
+q=1 x=12 y=6
+12-12<6
+return 2;
+
+q=2 x=12 y=3
+12-12<3
+return 4;
+*/
