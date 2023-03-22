@@ -378,3 +378,10 @@ label IF_TRUE0
 push argument 1
 return
 label IF_FALSE0
+function Math.twoToThe 0
+push static 0
+push argument 0
+add
+pop pointer 1
+push that 0
+return
