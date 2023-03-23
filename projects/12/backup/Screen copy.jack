@@ -64,17 +64,24 @@ class Screen {
 
     /** Draws the (x,y) pixel, using the current color. */
     function void drawPixel(int x, int y) {
-        var int address, mask;
-        //把坐标点换算成RAM屏幕内存对应的地址
-        let address = (32 * y) + (x / 16);
-        //使用余数找到对应的位，一个像素点就是一个位,使用 and 取余数
-        let mask = twoToThe[x & 15]; 
+        var int address, value, rem, quo;
+        let quo = x / 16;
+        //把坐标点换算成RAM中的地址
+        let address = screen + (32 * y) + quo;
+        //取出地址对应的值
+        let value = Memory.peek(address);
+        //使用余数找到对应的位，一个像素点就是一个位
+        // let rem = x & 15; 使用 and 取余数，只有当x是2的n次方时，才可以用 and 取余数
+        let rem = x - (quo * 16);
         //根据当前颜色变量来判断新写入的位是写0还是1
         if(color = 1) {
-            let screen[address] = screen[address] | mask;
+            //按位或
+            let value = value | twoToThe[rem];
         }else {
-            let screen[address] = screen[address] & ~mask;
+            //按位与、按位取反
+            let value = value & (~twoToThe[rem]);
         }
+        do Memory.poke(address, value);
         return;
     }
 
@@ -169,7 +176,7 @@ class Screen {
         }
         let dy = -r;
         while(~(dy > r)){
-            let exp1 = Math.sqrt(r*r - dy*dy);
+            let exp1 = Math.sqrt(Math.multiply(r,r) - Math.multiply(dy,dy));
             let exp2 = y+dy;
             do Screen.drawLine(x-exp1, exp2, x+exp1, exp2);
             let dy = dy + 1;
