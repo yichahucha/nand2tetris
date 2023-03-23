@@ -27,10 +27,6 @@ pop temp 0
 push constant 68
 call Output.printChar 1
 pop temp 0
-push constant 0
-push constant 0
-call Output.moveCursor 2
-pop temp 0
 push constant 65
 call Output.printChar 1
 pop temp 0
@@ -255,8 +251,6 @@ call Output.backSpace 0
 pop temp 0
 push constant 6789
 call Output.printInt 1
-pop temp 0
-call Output.backSpace 0
 pop temp 0
 push constant 0
 return

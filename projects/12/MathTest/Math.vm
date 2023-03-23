@@ -254,12 +254,22 @@ return
 goto IF_FALSE3
 label IF_TRUE3
 label IF_FALSE3
+push argument 1
+push constant 16384
+lt
+not
+if-goto IF_TRUE4
 push argument 0
 push argument 1
 push argument 1
 add
 call Math.divide 2
 pop local 0
+goto IF_FALSE4
+label IF_TRUE4
+push constant 0
+pop local 0
+label IF_FALSE4
 push argument 0
 push constant 2
 push local 0
@@ -270,29 +280,29 @@ sub
 push argument 1
 lt
 not
-if-goto IF_TRUE4
+if-goto IF_TRUE5
 push local 0
 push local 0
 add
 pop local 2
-goto IF_FALSE4
-label IF_TRUE4
+goto IF_FALSE5
+label IF_TRUE5
 push local 0
 push local 0
 add
 push constant 1
 add
 pop local 2
-label IF_FALSE4
+label IF_FALSE5
 push local 1
 not
-if-goto IF_TRUE5
+if-goto IF_TRUE6
 push local 2
 neg
 return
-goto IF_FALSE5
-label IF_TRUE5
-label IF_FALSE5
+goto IF_FALSE6
+label IF_TRUE6
+label IF_FALSE6
 push local 2
 return
 function Math.sqrt 4

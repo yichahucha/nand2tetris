@@ -138,7 +138,7 @@ label WHILE_END2
 call Output.println 0
 pop temp 0
 push local 0
-push constant 57
+push constant 66
 eq
 not
 if-goto IF_TRUE0

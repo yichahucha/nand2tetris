@@ -1592,19 +1592,9 @@ pop local 2
 goto WHILE_EXP0
 label WHILE_END0
 push static 2
-push constant 63
-eq
-not
-if-goto IF_TRUE1
-call Output.println 0
-pop temp 0
-goto IF_FALSE1
-label IF_TRUE1
-push static 2
 push constant 1
 add
 pop static 2
-label IF_FALSE1
 push constant 0
 return
 function Output.printString 2
@@ -1647,19 +1637,9 @@ push constant 0
 return
 function Output.println 0
 push static 1
-push constant 22
-lt
-not
-if-goto IF_TRUE0
-push static 1
 push constant 1
 add
 pop static 1
-goto IF_FALSE0
-label IF_TRUE0
-push constant 0
-pop static 1
-label IF_FALSE0
 push constant 0
 pop static 2
 push constant 0

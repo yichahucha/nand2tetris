@@ -1,0 +1,218 @@
+function Memory.init 0
+push constant 0
+pop static 0
+push constant 2048
+push constant 0
+push constant 14335
+call Memory.block 3
+pop static 1
+push constant 0
+return
+function Memory.peek 0
+push argument 0
+push constant 32767
+gt
+not
+if-goto IF_TRUE0
+push constant 0
+return
+goto IF_FALSE0
+label IF_TRUE0
+label IF_FALSE0
+push static 0
+push argument 0
+add
+pop pointer 1
+push that 0
+return
+function Memory.poke 0
+push argument 0
+push constant 32767
+gt
+not
+if-goto IF_TRUE0
+push constant 0
+return
+goto IF_FALSE0
+label IF_TRUE0
+label IF_FALSE0
+push argument 0
+push static 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Memory.alloc 4
+push static 1
+pop local 1
+push constant 1
+neg
+pop local 0
+label WHILE_EXP0
+push local 0
+not
+if-goto WHILE_END0
+push local 1
+call Memory.blockSize 1
+push argument 0
+push constant 2
+add
+gt
+push local 1
+call Memory.blockSize 1
+push argument 0
+push constant 2
+add
+eq
+or
+not
+if-goto IF_TRUE0
+push local 1
+call Memory.blockAddress 1
+push local 1
+call Memory.blockSize 1
+add
+push argument 0
+sub
+push constant 1
+add
+pop local 3
+push local 3
+push constant 2
+sub
+push constant 0
+push argument 0
+call Memory.block 3
+pop local 2
+push local 1
+push local 1
+call Memory.blockSize 1
+push argument 0
+sub
+push constant 2
+sub
+call Memory.setBlockSize 2
+pop temp 0
+push constant 0
+pop local 0
+goto IF_FALSE0
+label IF_TRUE0
+push local 1
+call Memory.blockNext 1
+push constant 0
+eq
+not
+if-goto IF_TRUE1
+push constant 0
+pop local 0
+goto IF_FALSE1
+label IF_TRUE1
+push local 1
+call Memory.blockNext 1
+pop local 1
+label IF_FALSE1
+label IF_FALSE0
+goto WHILE_EXP0
+label WHILE_END0
+push local 3
+return
+function Memory.deAlloc 3
+push static 1
+pop local 1
+push constant 1
+neg
+pop local 2
+push argument 0
+push constant 2
+sub
+pop local 0
+push static 1
+pop local 1
+label WHILE_EXP0
+push local 2
+not
+if-goto WHILE_END0
+push local 1
+call Memory.blockNext 1
+push constant 0
+eq
+not
+if-goto IF_TRUE0
+push local 1
+push local 0
+call Memory.setBlockNext 2
+pop temp 0
+push constant 0
+pop local 2
+goto IF_FALSE0
+label IF_TRUE0
+push local 1
+call Memory.blockNext 1
+pop local 1
+label IF_FALSE0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function Memory.block 0
+push constant 0
+push argument 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 1
+push argument 0
+add
+push argument 2
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push argument 0
+return
+function Memory.blockSize 0
+push argument 0
+push constant 1
+add
+pop pointer 1
+push that 0
+return
+function Memory.blockNext 0
+push argument 0
+push constant 0
+add
+pop pointer 1
+push that 0
+return
+function Memory.blockAddress 0
+push argument 0
+return
+function Memory.setBlockSize 0
+push constant 1
+push argument 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return
+function Memory.setBlockNext 0
+push constant 0
+push argument 0
+add
+push argument 1
+pop temp 0
+pop pointer 1
+push temp 0
+pop that 0
+push constant 0
+return

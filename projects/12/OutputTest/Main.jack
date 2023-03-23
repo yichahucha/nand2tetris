@@ -13,14 +13,13 @@ class Main {
     
     	let s = String.new(1);
     	do s.appendChar(String.doubleQuote());
-
+    
         do Output.moveCursor(0, 63);
         do Output.printChar(66);
         do Output.moveCursor(22, 0);
         do Output.printChar(67);
         do Output.moveCursor(22, 63);
         do Output.printChar(68);
-        do Output.moveCursor(0, 0);
         do Output.printChar(65);
         
         do Output.moveCursor(2, 0);
@@ -37,7 +36,6 @@ class Main {
         do Output.printInt(-12345);
         do Output.backSpace();
         do Output.printInt(6789);
-        do Output.backSpace();
         
         return;
     }

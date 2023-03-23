@@ -219,7 +219,13 @@ class Output {
             let address = address + 32;
             let i = i+1;
         }
-        let cursorX = cursorX + 1;
+        
+        // move cursor
+        if(cursorX = 63) {
+            do Output.println();
+        }else {
+            let cursorX = cursorX + 1;
+        }
         return;
     }
 
@@ -248,7 +254,11 @@ class Output {
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
-        let cursorY = cursorY + 1;
+        if( cursorY < 22 ) {
+            let cursorY = cursorY + 1;
+        }else {
+            let cursorY = 0;
+        }
         let cursorX = 0;
         return;
     }
